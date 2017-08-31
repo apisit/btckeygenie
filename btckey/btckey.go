@@ -11,6 +11,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
@@ -604,10 +605,10 @@ func (pub *PublicKey) ToAddressUncompressed() (address string) {
 func PrivateKeyFromHexString(key string) *ecdsa.PrivateKey {
 	var prKey *ecdsa.PrivateKey
 	keyBytes, _ := hex.DecodeString(key)
-	
+
 	keyBigInt := new(big.Int)
-  keyBigInt.SetBytes(keyBytes)
-	
+	keyBigInt.SetBytes(keyBytes)
+
 	prKey.D = keyBigInt
 	prKey.PublicKey.Curve = elliptic.P256()
 	return prKey
@@ -636,4 +637,3 @@ func Sign(data []byte, key string) ([]byte, error) {
 
 	return signature, nil
 }
-
