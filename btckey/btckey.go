@@ -601,18 +601,22 @@ func (pub *PublicKey) ToAddressUncompressed() (address string) {
 	return address
 }
 
-func PrivateKeyFromInt(key int64) *ecdsa.PrivateKey {
+func PrivateKeyFromHexString(key string) *ecdsa.PrivateKey {
 	var prKey *ecdsa.PrivateKey
-	prKey.D = big.NewInt(key)
+	keyBytes, _ := hex.DecodeString(key)
+	
+	keyBigInt := new(big.Int)
+  keyBigInt.SetBytes(keyBytes)
+	
+	prKey.D = keyBigInt
 	prKey.PublicKey.Curve = elliptic.P256()
 	return prKey
 }
 
-// Sign signs arbitrary data using ECDSA.
-func Sign(data []byte, key int64) ([]byte, error) {
+func Sign(data []byte, key string) ([]byte, error) {
 	// hash message
 	var pkey *ecdsa.PrivateKey
-	pkey = PrivateKeyFromInt(key)
+	pkey = PrivateKeyFromHexString(key)
 	digest := sha256.Sum256(data)
 
 	// sign the hash
@@ -632,3 +636,4 @@ func Sign(data []byte, key int64) ([]byte, error) {
 
 	return signature, nil
 }
+
