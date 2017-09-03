@@ -609,6 +609,7 @@ func PrivateKeyFromHexString(key string) (prKey ecdsa.PrivateKey) {
 
 	prKey.D = keyBigInt
 	prKey.PublicKey.Curve = elliptic.P256()
+	prKey.Curve = elliptic.P256()
 	return prKey
 }
 
