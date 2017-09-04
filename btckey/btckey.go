@@ -10,6 +10,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
@@ -599,6 +600,10 @@ func (pub *PublicKey) ToAddressUncompressed() (address string) {
 	address = b58checkencode(0x00, pub_hash_2)
 
 	return address
+}
+func hex2bytes(hexstring string) (b []byte) {
+	b, _ = hex.DecodeString(hexstring)
+	return b
 }
 
 func PrivateKeyFromHexString(key string) ecdsa.PrivateKey {
