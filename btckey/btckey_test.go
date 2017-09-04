@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"log"
 	"math/big"
 	"testing"
 )
@@ -472,7 +473,7 @@ func TestGenerateKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GenerateKey(): got error %v", err)
 	}
-	if !secp256k1.IsOnCurve(priv1.PublicKey.Point) {
+	if !secp256r1.IsOnCurve(priv1.PublicKey.Point) {
 		t.Fatalf("GenerateKey(): public key not on curve")
 	}
 
@@ -481,7 +482,7 @@ func TestGenerateKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GenerateKey(): got error %v", err)
 	}
-	if !secp256k1.IsOnCurve(priv1.PublicKey.Point) {
+	if !secp256r1.IsOnCurve(priv1.PublicKey.Point) {
 		t.Fatalf("GenerateKey(): public key not on curve")
 	}
 
@@ -495,4 +496,22 @@ func TestGenerateKey(t *testing.T) {
 	}
 
 	t.Log("success GenerateKey()")
+}
+
+func TestSignData(t *testing.T) {
+
+	privateKeyHexString := ""
+	publicKeyHash := ""
+	raw := ""
+
+	data := hex2bytes(raw)
+
+	signature, err := Sign(data, privateKeyHexString)
+	if err != nil {
+		t.Fatalf("TestSignData(): got error %v", err)
+	}
+	signatureString := hex.EncodeToString(signature)
+	log.Println(signatureString)
+	log.Println(len(signatureString))
+	log.Printf("%v014140%v%v", raw, signatureString, publicKeyHash)
 }

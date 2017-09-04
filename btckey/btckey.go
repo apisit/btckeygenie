@@ -9,14 +9,13 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
 	"strings"
 
+	"github.com/apisit/rfc6979"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -602,32 +601,28 @@ func (pub *PublicKey) ToAddressUncompressed() (address string) {
 	return address
 }
 
-func PrivateKeyFromHexString(key string) (prKey ecdsa.PrivateKey) {
-	keyBytes, _ := hex.DecodeString(key)
-	keyBigInt := new(big.Int)
-	keyBigInt.SetBytes(keyBytes)
+func PrivateKeyFromHexString(key string) ecdsa.PrivateKey {
+	b := hex2bytes(key)
 
-	prKey.D = keyBigInt
-	prKey.PublicKey.Curve = elliptic.P256()
-	prKey.Curve = elliptic.P256()
-	return prKey
+	priv := new(ecdsa.PrivateKey)
+	priv.PublicKey.Curve = elliptic.P256()
+	priv.D = new(big.Int).SetBytes(b)
+	priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.Curve.ScalarBaseMult(b)
+	return *priv
 }
 
 func Sign(data []byte, key string) ([]byte, error) {
-	// hash message
-	var pkey ecdsa.PrivateKey
-	pkey = PrivateKeyFromHexString(key)
+
+	var privateKey ecdsa.PrivateKey
+	privateKey = PrivateKeyFromHexString(key)
 	digest := sha256.Sum256(data)
 
-	// sign the hash
-	r, s, err := ecdsa.Sign(rand.Reader, &pkey, digest[:])
+	r, s, err := rfc6979.SignECDSA(&privateKey, digest[:], sha256.New)
 	if err != nil {
 		return nil, err
 	}
 
-	// encode the signature {R, S}
-	// big.Int.Bytes() will need padding in the case of leading zero bytes
-	params := pkey.Curve.Params()
+	params := privateKey.Curve.Params()
 	curveOrderByteSize := params.P.BitLen() / 8
 	rBytes, sBytes := r.Bytes(), s.Bytes()
 	signature := make([]byte, curveOrderByteSize*2)
