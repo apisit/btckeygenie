@@ -8,20 +8,12 @@ package btckey
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"log"
 	"math/big"
 	"testing"
 )
-
-/******************************************************************************/
-/* Helper Functions */
-/******************************************************************************/
-
-func hex2bytes(hexstring string) (b []byte) {
-	b, _ = hex.DecodeString(hexstring)
-	return b
-}
 
 /******************************************************************************/
 /* Base-58 Encode/Decode */
@@ -500,18 +492,20 @@ func TestGenerateKey(t *testing.T) {
 
 func TestSignData(t *testing.T) {
 
-	privateKeyHexString := ""
-	publicKeyHash := ""
-	raw := ""
+	wif := ""
+	var priv PrivateKey
+	err := priv.FromWIF(wif)
 
-	data := hex2bytes(raw)
+	raw := []byte("test")
+	hash := sha256.Sum256(raw)
 
-	signature, err := Sign(data, privateKeyHexString)
+	privateKeyString := hex.EncodeToString(priv.ToBytes())
+	signature, err := Sign(raw, privateKeyString)
 	if err != nil {
 		t.Fatalf("TestSignData(): got error %v", err)
 	}
-	signatureString := hex.EncodeToString(signature)
-	log.Println(signatureString)
-	log.Println(len(signatureString))
-	log.Printf("%v014140%v%v", raw, signatureString, publicKeyHash)
+
+	p := PrivateKeyFromHexString(privateKeyString)
+	valid := Verify(&p.PublicKey, signature, hash[:])
+	log.Printf("valid = %v", valid)
 }

@@ -631,8 +631,18 @@ func Sign(data []byte, key string) ([]byte, error) {
 	curveOrderByteSize := params.P.BitLen() / 8
 	rBytes, sBytes := r.Bytes(), s.Bytes()
 	signature := make([]byte, curveOrderByteSize*2)
+
+	//log.Printf("R = %+v %v", rBytes, len(rBytes))
+	//log.Printf("S = %+v %v", sBytes, len(sBytes))
 	copy(signature[curveOrderByteSize-len(rBytes):], rBytes)
 	copy(signature[curveOrderByteSize*2-len(sBytes):], sBytes)
 
 	return signature, nil
+}
+
+func Verify(pub *ecdsa.PublicKey, signature []byte, hash []byte) bool {
+	//curveOrderByteSize := secp256r1.P.BitLen() / 8
+	rBytes := new(big.Int).SetBytes(signature[0:32])
+	sBytes := new(big.Int).SetBytes(signature[32:64])
+	return ecdsa.Verify(pub, hash, rBytes, sBytes)
 }
