@@ -492,20 +492,34 @@ func TestGenerateKey(t *testing.T) {
 
 func TestSignData(t *testing.T) {
 
-	wif := ""
+	wif := "L5hbtj4mX16TnVnQTdda4znw1nvt3DB7DVxU6sP97RDVMtufQwbT"
 	var priv PrivateKey
 	err := priv.FromWIF(wif)
 
 	raw := []byte("test")
-	hash := sha256.Sum256(raw)
 
 	privateKeyString := hex.EncodeToString(priv.ToBytes())
 	signature, err := Sign(raw, privateKeyString)
 	if err != nil {
 		t.Fatalf("TestSignData(): got error %v", err)
 	}
+	log.Printf("%v", signature)
+	log.Printf("%v", hex.EncodeToString(priv.PublicKey.ToBytes()))
+	log.Printf("%+v", priv)
 
-	p := PrivateKeyFromHexString(privateKeyString)
-	valid := Verify(&p.PublicKey, signature, hash[:])
+	pub := priv.PublicKey.ToBytes()
+
+	hash := sha256.Sum256([]byte("test"))
+
+	valid := Verify(pub, signature, hash[:])
 	log.Printf("valid = %v", valid)
+	// b := hex2bytes(privateKeyString)
+
+	// priv := new(ecdsa.PrivateKey)
+	// priv.PublicKey.Curve = elliptic.P256()
+	// priv.D = new(big.Int).SetBytes(b)
+	// priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.Curve.ScalarBaseMult(b)
+
+	// valid := Verify(&p.PublicKey, signature, hash[:])
+	// log.Printf("valid = %v", valid)
 }
