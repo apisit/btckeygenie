@@ -507,7 +507,9 @@ func TestSignData(t *testing.T) {
 	log.Printf("%v", hex.EncodeToString(priv.PublicKey.ToBytes()))
 	log.Printf("%+v", priv)
 
-	pub := priv.PublicKey.ToBytes()
+	another, _ := GenerateKey(rand.Reader)
+
+	pub := another.PublicKey.ToBytes()
 
 	hash := sha256.Sum256([]byte("test"))
 
@@ -522,4 +524,11 @@ func TestSignData(t *testing.T) {
 
 	// valid := Verify(&p.PublicKey, signature, hash[:])
 	// log.Printf("valid = %v", valid)
+}
+
+func TestValidateNEOAddress(t *testing.T) {
+	valid := ValidateNEOAddress("AJJSUnqrEHXQJG5Wg2tChrnk5gzdfcELZJ")
+	if valid == false {
+		t.Fail()
+	}
 }

@@ -13,6 +13,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"math/big"
 	"strings"
 
@@ -647,4 +648,18 @@ func Verify(publicKey []byte, signature []byte, hash []byte) bool {
 	rBytes := new(big.Int).SetBytes(signature[0:32])
 	sBytes := new(big.Int).SetBytes(signature[32:64])
 	return ecdsa.Verify(p, hash, rBytes, sBytes)
+}
+
+func ValidateNEOAddress(address string) bool {
+	//NEO address version is 23
+	//https://github.com/neo-project/neo/blob/427a3cd08f61a33e98856e4b4312b8147708105a/neo/protocol.json#L4
+	ver, _, err := b58checkdecode(address)
+	if err != nil {
+		return false
+	}
+	if ver != 23 {
+		return false
+	}
+	log.Printf("%v", ver)
+	return true
 }
