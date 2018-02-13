@@ -95,15 +95,15 @@ func TestBase58Check(t *testing.T) {
 
 	/* Test base-58 check decoding */
 	for i := 0; i < len(b58CheckVectors); i++ {
-		ver, got, err := b58checkdecode(b58CheckVectors[i].encoded)
+		ver, got, err := B58checkdecode(b58CheckVectors[i].encoded)
 		if err != nil {
-			t.Fatalf("b58checkdecode(%s): got error %v, expected ver %v, bytes %v", b58CheckVectors[i].encoded, err, b58CheckVectors[i].ver, b58CheckVectors[i].bytes)
+			t.Fatalf("B58checkdecode(%s): got error %v, expected ver %v, bytes %v", b58CheckVectors[i].encoded, err, b58CheckVectors[i].ver, b58CheckVectors[i].bytes)
 		}
 		if ver != b58CheckVectors[i].ver || bytes.Compare(got, b58CheckVectors[i].bytes) != 0 {
-			t.Fatalf("b58checkdecode(%s): got ver %v, bytes %v, expected ver %v, bytes %v", b58CheckVectors[i].encoded, ver, got, b58CheckVectors[i].ver, b58CheckVectors[i].bytes)
+			t.Fatalf("B58checkdecode(%s): got ver %v, bytes %v, expected ver %v, bytes %v", b58CheckVectors[i].encoded, ver, got, b58CheckVectors[i].ver, b58CheckVectors[i].bytes)
 		}
 	}
-	t.Log("success b58checkdecode() on valid vectors")
+	t.Log("success B58checkdecode() on valid vectors")
 
 	/* Test base-58 check decoding of invalid strings */
 	b58CheckInvalidVectors := []string{
@@ -113,13 +113,13 @@ func TestBase58Check(t *testing.T) {
 	}
 
 	for i := 0; i < len(b58CheckInvalidVectors); i++ {
-		ver, got, err := b58checkdecode(b58CheckInvalidVectors[i])
+		ver, got, err := B58checkdecode(b58CheckInvalidVectors[i])
 		if err == nil {
-			t.Fatalf("b58checkdecode(%s): got ver %v, bytes %v, expected error", b58CheckInvalidVectors[i], ver, got)
+			t.Fatalf("B58checkdecode(%s): got ver %v, bytes %v, expected error", b58CheckInvalidVectors[i], ver, got)
 		}
-		t.Logf("b58checkdecode(%s): got expected err %v", b58CheckInvalidVectors[i], err)
+		t.Logf("B58checkdecode(%s): got expected err %v", b58CheckInvalidVectors[i], err)
 	}
-	t.Log("success b58checkdecode() on invalid vectors")
+	t.Log("success B58checkdecode() on invalid vectors")
 }
 
 /******************************************************************************/
@@ -496,7 +496,7 @@ func TestSignData(t *testing.T) {
 	var priv PrivateKey
 	err := priv.FromWIF(wif)
 
-	raw := []byte("test")
+	raw := []byte("NmMmdf3eSJyYtqwcFiUILzXv3f")
 
 	privateKeyString := hex.EncodeToString(priv.ToBytes())
 	signature, err := Sign(raw, privateKeyString)
@@ -511,7 +511,7 @@ func TestSignData(t *testing.T) {
 
 	pub := another.PublicKey.ToBytes()
 
-	hash := sha256.Sum256([]byte("test"))
+	hash := sha256.Sum256(raw)
 
 	valid := Verify(pub, signature, hash[:])
 	log.Printf("valid = %v", valid)
@@ -531,4 +531,9 @@ func TestValidateNEOAddress(t *testing.T) {
 	if valid == false {
 		t.Fail()
 	}
+}
+
+func TestScriptHashToNEO(t *testing.T) {
+	address := ScriptHashToNEOAddress("23ba2703c53263e8d6e522dc32203339dcd8eee9")
+	log.Printf("address = %v", address)
 }

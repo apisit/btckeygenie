@@ -236,8 +236,8 @@ func b58checkencodeNEO(ver uint8, b []byte) (s string) {
 	return s
 }
 
-// b58checkdecode decodes base-58 check encoded string s into a version ver and byte slice b.
-func b58checkdecode(s string) (ver uint8, b []byte, err error) {
+// B58checkdecode decodes base-58 check encoded string s into a version ver and byte slice b.
+func B58checkdecode(s string) (ver uint8, b []byte, err error) {
 	/* Decode base58 string */
 	b, err = b58decode(s)
 	if err != nil {
@@ -294,7 +294,7 @@ func CheckWIF(wif string) (valid bool, err error) {
 	/* See https://en.bitcoin.it/wiki/Wallet_import_format */
 
 	/* Base58 Check Decode the WIF string */
-	ver, priv_bytes, err := b58checkdecode(wif)
+	ver, priv_bytes, err := B58checkdecode(wif)
 	if err != nil {
 		return false, err
 	}
@@ -375,7 +375,7 @@ func (priv *PrivateKey) FromWIF(wif string) (err error) {
 	/* See https://en.bitcoin.it/wiki/Wallet_import_format */
 
 	/* Base58 Check Decode the WIF string */
-	ver, priv_bytes, err := b58checkdecode(wif)
+	ver, priv_bytes, err := B58checkdecode(wif)
 	if err != nil {
 		return err
 	}
@@ -617,6 +617,12 @@ func PrivateKeyFromHexString(key string) ecdsa.PrivateKey {
 	return *priv
 }
 
+func ScriptHashToNEOAddress(scriptHash string) string {
+	b := hex2bytes(scriptHash)
+	address := b58checkencodeNEO(0x17, b)
+	return address
+}
+
 func Sign(data []byte, key string) ([]byte, error) {
 
 	var privateKey ecdsa.PrivateKey
@@ -653,7 +659,7 @@ func Verify(publicKey []byte, signature []byte, hash []byte) bool {
 func ValidateNEOAddress(address string) bool {
 	//NEO address version is 23
 	//https://github.com/neo-project/neo/blob/427a3cd08f61a33e98856e4b4312b8147708105a/neo/protocol.json#L4
-	ver, _, err := b58checkdecode(address)
+	ver, _, err := B58checkdecode(address)
 	if err != nil {
 		return false
 	}
